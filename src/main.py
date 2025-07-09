@@ -1,12 +1,12 @@
-from diagnostico_experto import DiagnosticoPC, Sintomas
-from subir_imagen import subir_imagen
-from analizar_imagen import analizar_imagen
-from generar_reporte import generar_reporte
+from data.diagnostico_experto import DiagnosticoPC, Sintomas
+from data.subir_imagen import subir_imagen
+from data.analizar_imagen import analizar_imagen
+from data.generar_reporte import generar_reporte
 
 import io
 import sys
 
-import subir_imagen
+import data.subir_imagen as subir_imagen
 
 def ejecutar_diagnostico():
     print("\n=== DiagnoPC: Sistema Experto de Fallas en Computadoras ===\n")
