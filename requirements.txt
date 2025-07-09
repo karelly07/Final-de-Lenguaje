@@ -1,0 +1,14 @@
+experta 1.9.4: Motor de inferencia para sistemas expertos basado en reglas.
+fpdf 1.7.2: Generación de archivos PDF.
+frozendict 1.2: Diccionarios inmutables.
+numpy 2.2.5: Operaciones numéricas avanzadas.
+opencv-python 4.11.0.86: Procesamiento de imágenes.
+packaging 25.0: Herramientas para manejar versiones y paquetes.
+pandas 2.2.3: Análisis y manipulación de datos tabulares.
+pillow 11.3.0: Procesamiento de imágenes.
+pytesseract 0.3.13: Reconocimiento óptico de caracteres (OCR).
+python-dateutil 2.9.0: Manejo de fechas.
+pytz 2025.2: Manejo de zonas horarias.
+schema 0.6.7: Validación de estructuras de datos.
+six 1.17.0: Compatibilidad entre Python 2 y 3.
+tzdata 2025.2: Base de datos de zonas horarias.
