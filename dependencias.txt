@@ -1,0 +1,18 @@
+DEPENDENCIAS DEL PROYECTO
+
+- experta: Motor de inferencia para sistemas expertos basado en reglas.
+- fpdf: Generación de archivos PDF.
+- frozendict: Diccionarios inmutables.
+- numpy: Operaciones numéricas avanzadas.
+- opencv-python: Procesamiento de imágenes.
+- packaging: Herramientas para manejar versiones y paquetes.
+- pandas: Análisis y manipulación de datos tabulares.
+- pillow: Procesamiento de imágenes.
+- pytesseract: Reconocimiento óptico de caracteres (OCR).
+- python-dateutil: Manejo de fechas.
+- pytz: Manejo de zonas horarias.
+- schema: Validación de estructuras de datos.
+- six: Compatibilidad entre Python 2 y 3.
+- tzdata: Base de datos de zonas horarias.
+
+Todas están especificadas en el archivo requirements.txt.
