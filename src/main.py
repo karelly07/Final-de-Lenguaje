@@ -2,11 +2,7 @@ from diagnostico_experto import DiagnosticoPC, Sintomas
 from subir_imagen import subir_imagen
 from analizar_imagen import analizar_imagen
 from generar_reporte import generar_reporte
-
-import io
-import sys
-
-import subir_imagen as subir_imagen
+from registro_consulta import registro_consulta
 
 def ejecutar_diagnostico():
     print("\n=== DiagnoPC: Sistema Experto de Fallas en Computadoras ===\n")
@@ -17,51 +13,41 @@ def ejecutar_diagnostico():
     if usar_imagen == "si":
         ruta = subir_imagen()
         if ruta:
-            color_detectado = analizar_imagen(ruta)
-            print(f"\n  Color de pantalla detectado: {color_detectado}")
+            import cv2
+            imagen = cv2.imread(ruta)
+            color_detectado = analizar_imagen(imagen)
+            print(f"\nResultado del análisis de pantalla: {color_detectado}")
         else:
             print("No se seleccionó ninguna imagen.")
 
     print("\nResponde las siguientes preguntas con 'si' o 'no':")
     enciende = input("¿La computadora enciende? (si/no): ").strip().lower()
-    emite_pitidos = input("¿Emite pitidos al arrancar? : ").strip().lower()
-
-    pitido_tipo = "ninguno"
+    emite_pitidos = input("¿Emite pitidos al arrancar? (si/no): ").strip().lower()
+    pitido_tipo = ""
     if emite_pitidos == "si":
-        print("\nEjemplos válidos: '1 corto', '3 cortos', '1 largo y 2 cortos'")
-        pitido_tipo = input("Describe el tipo de pitido: ").strip().lower()
-    pantalla = input("¿Muestra algo en la pantalla? (si/no): ").strip().lower()
-    se_apaga = input("¿Se apaga sola después de un rato? (si/no): ").strip().lower()
+        pitido_tipo = input("¿Qué tipo de pitido se escucha (corto, largo, continuo)?: ").strip().lower()
+    pantalla = input("¿La pantalla muestra algo? (si/no): ").strip().lower()
+    se_apaga = input("¿La computadora se apaga sola después de encender? (si/no): ").strip().lower()
 
-    engine = DiagnosticoPC()
-    engine.reset()
-    engine.declare(Sintomas(
+    sintomas = Sintomas(
         enciende=enciende,
-        pitidos=pitido_tipo,
+        pitidos=emite_pitidos,
+        tipo_pitido=pitido_tipo,
         pantalla=pantalla,
         se_apaga=se_apaga,
         color_pantalla=color_detectado
-    ))
+    )
 
-    buffer = io.StringIO()
-    sys.stdout = buffer
-    engine.run()
-    sys.stdout = sys.__stdout__
-    diagnosticos = buffer.getvalue().strip().split("\n\n")
+    experto = DiagnosticoPC()
+    experto.reset()
+    experto.declare(sintomas)
+    experto.run()
 
-    respuestas = {
-        "enciende": enciende,
-        "pitidos": pitido_tipo,
-        "pantalla": pantalla,
-        "se_apaga": se_apaga,
-        "color_pantalla": color_detectado
-    }
+    diagnostico = experto.diagnostico_final or "No se pudo determinar el problema."
+    print("\nDiagnóstico final:", diagnostico)
 
-    print("\n Diagnóstico generado por el sistema experto:")
-    for diag in diagnosticos:
-        print(f"→ {diag}")
-        
-    generar_reporte(respuestas, diagnosticos)
+    registro_consulta(str(sintomas), diagnostico)
+    generar_reporte(sintomas, diagnostico)
 
 if __name__ == "__main__":
-    ejecutar_diagnostico() 
+    ejecutar_diagnostico()

@@ -1,0 +1,3 @@
+Consulta: <f-1>
+Respuesta: La computadora no enciende. Revisa la fuente de poder o el cable de energía.
+----------------------------------------

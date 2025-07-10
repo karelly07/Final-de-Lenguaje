@@ -1,7 +1,7 @@
 import cv2
 import pytesseract
 
-def analizar_pantalla_azul(imagen):
+def analizar_imagen(imagen):
     try:
         gris = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
         texto = pytesseract.image_to_string(gris, lang='spa') 
@@ -30,7 +30,6 @@ def analizar_pantalla_azul(imagen):
             "0X00000133": "DPC_WATCHDOG_VIOLATION. Problemas con drivers o SSD; actualiza el firmware."
         }
 
-        
         for clave, solucion in errores.items():
             if clave in texto:
                 return f" Error detectado: {clave}\n Solución: {solucion}"
