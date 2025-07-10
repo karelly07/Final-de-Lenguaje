@@ -1,0 +1,21 @@
+# Entorno virtual
+venv_diag/
+.env/
+.venv/
+
+# Archivos compilados de Python
+__pycache__/
+*.pyc
+
+# Archivos temporales del sistema
+.DS_Store
+Thumbs.db
+
+# Logs y archivos generados por la app
+src/__pycache__/
+registro_consultas.txt
+reporte_diagnostico.pdf
+
+# VSCode y otros IDEs
+.vscode/
+.idea/
