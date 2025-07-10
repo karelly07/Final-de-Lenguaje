@@ -33,7 +33,7 @@ def analizar_pantalla_azul(imagen):
         
         for clave, solucion in errores.items():
             if clave in texto:
-                return f"🧾 Error detectado: {clave}\n💡 Solución: {solucion}"
+                return f" Error detectado: {clave}\n Solución: {solucion}"
 
         return "Pantalla azul detectada, pero el error no fue reconocido. Revisa el texto manualmente."
 
