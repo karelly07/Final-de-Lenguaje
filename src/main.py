@@ -1,6 +1,11 @@
 import customtkinter as ctk
 from tkinter import filedialog
-from PIL import Image, ImageTk
+from PIL import Image
+
+from diagnostico_experto import DiagnosticoPC, Sintomas
+from analizar_imagen import analizar_imagen
+from generar_reporte import generar_reporte
+from registro_consulta import registro_consulta
 
 class DiagnoPCApp(ctk.CTk):
     def __init__(self):
@@ -17,7 +22,6 @@ class DiagnoPCApp(ctk.CTk):
 
         # Variables
         self.imagen_ruta = ""
-        self.codigo_error = ""
         self.nombre_imagen = ctk.StringVar(value="Ninguna imagen seleccionada")
         self.codigo_var = ctk.StringVar(value="No detectado")
 
@@ -108,10 +112,8 @@ class DiagnoPCApp(ctk.CTk):
         if ruta:
             import cv2
             imagen = cv2.imread(ruta)
-            # Aquí va tu lógica real de análisis:
-            # codigo = analizar_imagen(imagen)
-            # Para demo, le meto un código falso:
-            codigo = "0X0000000A"
+            # Usar función real para analizar la imagen:
+            codigo = analizar_imagen(imagen) or "No detectado"
             self.imagen_ruta = ruta
             nombre = ruta.split("/")[-1] if "/" in ruta else ruta.split("\\")[-1]
             self.nombre_imagen.set(nombre)
@@ -144,19 +146,36 @@ class DiagnoPCApp(ctk.CTk):
         se_apaga = self.se_apaga_var.get()
         codigo = self.codigo_var.get()
 
-        # Aquí podrías integrar tu DiagnosticoPC real.
-        if enciende == "no":
-            diagnostico = "La computadora no enciende. Revisa la fuente de poder."
-        elif pitidos == "si" and tipo_pitido.lower() == "largo":
-            diagnostico = "Pitido largo: posible problema con la memoria RAM."
-        elif pantalla == "no":
-            diagnostico = "No hay imagen: posible problema con la tarjeta de video o RAM."
-        elif codigo != "No detectado":
-            diagnostico = f"Código detectado: {codigo}"
-        else:
-            diagnostico = "Sin fallas graves detectadas."
+        color_pantalla = codigo if codigo != "No detectado" else "desconocido"
+
+        # Crea objeto síntomas como lo espera el sistema experto
+        sintomas = Sintomas(
+            enciende=enciende,
+            pitidos=pitidos,
+            tipo_pitido=tipo_pitido,
+            pantalla=pantalla,
+            se_apaga=se_apaga,
+            color_pantalla=color_pantalla
+        )
+
+        # Ejecuta el sistema experto
+        experto = DiagnosticoPC()
+        experto.reset()
+        experto.declare(sintomas)
+        experto.run()
+        diagnostico = experto.diagnostico_final or "No se pudo determinar el problema."
 
         self.resultado_label.configure(text=diagnostico)
+
+        # Registrar consulta y generar reporte
+        try:
+            registro_consulta(str(sintomas), diagnostico)
+        except Exception as e:
+            print("Error al registrar consulta:", e)
+        try:
+            generar_reporte(sintomas, diagnostico)
+        except Exception as e:
+            print("Error al generar reporte:", e)
 
 if __name__ == "__main__":
     ctk.set_appearance_mode("dark")
