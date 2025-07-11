@@ -1,14 +1,21 @@
 import cv2
+import numpy as np
 import pytesseract
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 def analizar_imagen(imagen):
     try:
         gris = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
-        texto = pytesseract.image_to_string(gris, lang='eng').strip()  # Elimina espacios en blanco
+        texto = pytesseract.image_to_string(gris, lang='eng').strip()
 
-        if not texto:  # Si no se detecta texto
+        # Detectar si la imagen es casi negra (umbral ajustable)
+        porcentaje_negro = np.sum(gris < 20) / gris.size
+        if porcentaje_negro > 0.95:  # 95% de la imagen es casi negro
             return "Pantalla negra, no se encontró el error. Pase a la fase de preguntas."
+
+        # Si no hay texto pero la imagen NO es negra
+        if not texto:
+            return "No se detectó texto en la imagen. Asegúrese de subir una imagen válida o pase a la fase de preguntas."
 
         texto = texto.upper()
         print("\nTexto detectado en pantalla azul:\n", texto)
