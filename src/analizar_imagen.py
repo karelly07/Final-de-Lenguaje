@@ -5,9 +5,12 @@ pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tessera
 def analizar_imagen(imagen):
     try:
         gris = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
-        texto = pytesseract.image_to_string(gris, lang='eng') 
+        texto = pytesseract.image_to_string(gris, lang='eng').strip()  # Elimina espacios en blanco
 
-        texto = texto.upper() 
+        if not texto:  # Si no se detecta texto
+            return "Pantalla negra, no se encontró el error. Pase a la fase de preguntas."
+
+        texto = texto.upper()
         print("\nTexto detectado en pantalla azul:\n", texto)
 
         errores = {
@@ -33,7 +36,7 @@ def analizar_imagen(imagen):
 
         for clave, solucion in errores.items():
             if clave in texto:
-                return f" Error detectado: {clave}\n Solución: {solucion}"
+                return f"Error detectado: {clave}\nSolución: {solucion}"
 
         return "Pantalla azul detectada, pero el error no fue reconocido. Revisa el texto manualmente."
 
