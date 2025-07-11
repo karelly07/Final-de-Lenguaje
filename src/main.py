@@ -1,11 +1,11 @@
 import customtkinter as ctk
-from tkinter import filedialog
 from PIL import Image
 
 from diagnostico_experto import DiagnosticoPC, Sintomas
 from analizar_imagen import analizar_imagen
 from generar_reporte import generar_reporte
 from registro_consulta import registro_consulta
+from subir_imagen import subir_imagen  # solo la función para seleccionar archivo
 
 class DiagnoPCApp(ctk.CTk):
     def __init__(self):
@@ -27,7 +27,7 @@ class DiagnoPCApp(ctk.CTk):
 
         # TAB ANÁLISIS DE IMAGEN
         ctk.CTkLabel(self.tab_img, text="Sube una imagen del equipo (opcional):", font=("Arial", 14)).pack(pady=(38,8))
-        ctk.CTkButton(self.tab_img, text="Subir imagen", command=self.subir_imagen).pack()
+        ctk.CTkButton(self.tab_img, text="Subir imagen", command=self.subir_imagen_ui).pack()
         ctk.CTkLabel(self.tab_img, textvariable=self.nombre_imagen).pack(pady=(6, 0))
         
         # Vista previa
@@ -44,7 +44,6 @@ class DiagnoPCApp(ctk.CTk):
         preguntas_frame = ctk.CTkFrame(frame, fg_color="transparent")
         preguntas_frame.pack(expand=True)
 
-        # Grid para centrar
         for i in range(3):
             preguntas_frame.grid_rowconfigure(i, weight=1)
         preguntas_frame.grid_columnconfigure(0, weight=1)
@@ -90,29 +89,30 @@ class DiagnoPCApp(ctk.CTk):
         ctk.CTkRadioButton(fila4, text="No", variable=self.se_apaga_var, value="no").pack(side="left")
         q4.grid(row=1, column=1, sticky="ew", padx=30, pady=(0, 0))
 
-        # Pregunta tipo de pitido (centrado debajo de las preguntas)
+        # Pregunta tipo de pitido
         self.pitido_tipo_frame = ctk.CTkFrame(preguntas_frame, fg_color="transparent")
         self.pitido_tipo_label = ctk.CTkLabel(self.pitido_tipo_frame, text="¿Qué tipo de pitido se escucha?", font=("Arial", 13))
-        self.pitido_tipo_select = ctk.CTkOptionMenu(self.pitido_tipo_frame, values=["Corto", "Largo", "Continuo", "Otro"], width=180)
+        self.pitido_tipo_select = ctk.CTkOptionMenu(self.pitido_tipo_frame, values=["Corto", "Largo", "Continuo"], width=180)
         self.pitido_tipo_frame.grid_remove()
 
-        # Diagnosticar centrado abajo
+        # Botones Diagnosticar y Generar Reporte
         ctk.CTkButton(frame, text="Diagnosticar", command=self.diagnosticar, width=170).pack(pady=(20, 5))
+        ctk.CTkButton(frame, text="Generar Reporte", command=self.generar_reporte_pdf, width=170).pack(pady=(0, 15))
+
         self.resultado_label = ctk.CTkLabel(frame, text="", font=("Arial", 14, "bold"), wraplength=640, anchor="center", justify="center")
         self.resultado_label.pack(pady=(7, 0))
 
-        # Referencia a imagen para evitar que la recolección de basura borre la vista previa
-        self.img_tk = None
+        self.img_tk = None  # Referencia para imagen preview
 
-    def subir_imagen(self):
-        ruta = filedialog.askopenfilename(
-            title="Selecciona una imagen",
-            filetypes=[("Imágenes", "*.png;*.jpg;*.jpeg;*.bmp")]
-        )
+        # Para guardar estado actual
+        self.ultimo_diagnostico = None
+        self.ultimo_sintomas = None
+
+    def subir_imagen_ui(self):
+        ruta = subir_imagen()
         if ruta:
             import cv2
             imagen = cv2.imread(ruta)
-            # Usar función real para analizar la imagen:
             codigo = analizar_imagen(imagen) or "No detectado"
             self.imagen_ruta = ruta
             nombre = ruta.split("/")[-1] if "/" in ruta else ruta.split("\\")[-1]
@@ -121,13 +121,13 @@ class DiagnoPCApp(ctk.CTk):
 
             # Mostrar vista previa
             img_pil = Image.open(ruta)
-            img_pil.thumbnail((200, 200))  # Max 200x200 px
+            img_pil.thumbnail((200, 200))
             self.img_tk = ctk.CTkImage(light_image=img_pil, dark_image=img_pil, size=img_pil.size)
             self.img_preview_label.configure(image=self.img_tk, text="")
         else:
             self.nombre_imagen.set("Ninguna imagen seleccionada")
             self.codigo_var.set("No detectado")
-            self.img_preview_label.configure(image=None, text="")  # Oculta preview
+            self.img_preview_label.configure(image=None, text="")
 
     def toggle_pitido_tipo(self):
         if self.pitidos_var.get() == "si":
@@ -148,7 +148,6 @@ class DiagnoPCApp(ctk.CTk):
 
         color_pantalla = codigo if codigo != "No detectado" else "desconocido"
 
-        # Crea objeto síntomas como lo espera el sistema experto
         sintomas = Sintomas(
             enciende=enciende,
             pitidos=pitidos,
@@ -158,7 +157,6 @@ class DiagnoPCApp(ctk.CTk):
             color_pantalla=color_pantalla
         )
 
-        # Ejecuta el sistema experto
         experto = DiagnosticoPC()
         experto.reset()
         experto.declare(sintomas)
@@ -167,15 +165,22 @@ class DiagnoPCApp(ctk.CTk):
 
         self.resultado_label.configure(text=diagnostico)
 
-        # Registrar consulta y generar reporte
+        self.ultimo_diagnostico = diagnostico
+        self.ultimo_sintomas = sintomas
+
+    def generar_reporte_pdf(self):
+        if self.ultimo_diagnostico is None or self.ultimo_sintomas is None:
+            self.resultado_label.configure(text="Por favor, primero realice el diagnóstico.")
+            return
         try:
-            registro_consulta(str(sintomas), diagnostico)
+            registro_consulta(str(self.ultimo_sintomas), self.ultimo_diagnostico)
         except Exception as e:
             print("Error al registrar consulta:", e)
         try:
-            generar_reporte(sintomas, diagnostico)
+            generar_reporte(self.ultimo_sintomas, self.ultimo_diagnostico)
+            self.resultado_label.configure(text="Reporte generado exitosamente.")
         except Exception as e:
-            print("Error al generar reporte:", e)
+            self.resultado_label.configure(text=f"Error al generar reporte: {e}")
 
 if __name__ == "__main__":
     ctk.set_appearance_mode("dark")

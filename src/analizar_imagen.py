@@ -1,17 +1,18 @@
 import cv2
 import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 def analizar_imagen(imagen):
     try:
         gris = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
-        texto = pytesseract.image_to_string(gris, lang='spa') 
+        texto = pytesseract.image_to_string(gris, lang='eng') 
 
         texto = texto.upper() 
         print("\nTexto detectado en pantalla azul:\n", texto)
 
         errores = {
             "INACCESSIBLE_BOOT_DEVICE": "Verifica la conexión del disco y drivers de almacenamiento.",
-            "0X00000050": "FALLO DE PÁGINA EN ÁREA NO PAGADA. Posible RAM defectuosa o controlador dañado.",
+            "PAGE_FAULT_IN_NONPAGED_AREA": "FALLO DE PÁGINA EN ÁREA NO PAGADA. Posible RAM defectuosa o controlador dañado.",
             "IRQL_NOT_LESS_OR_EQUAL": "Conflicto de drivers. Prueba arrancar en modo seguro y reinstalar controladores.",
             "0X0000000A": "IRQL_NOT_LESS_OR_EQUAL. Incompatibilidad de controlador o hardware.",
             "0X0000003B": "EXCEPCIÓN DE SERVICIO DEL SISTEMA. Conflictos entre drivers o antivirus.",
