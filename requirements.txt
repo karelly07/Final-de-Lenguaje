@@ -1,6 +1,6 @@
 experta==1.9.4
 fpdf==1.7.2
-frozendict==1.2
+frozendict==2.3.4
 numpy==1.26.4
 opencv-python==4.11.0.86
 packaging==25.0
@@ -12,3 +12,4 @@ pytz==2023.3
 schema==0.6.7
 six==1.16.0
 tzdata==2023.3
+customtkinter
