@@ -145,16 +145,18 @@ class DiagnoPCApp(ctk.CTk):
         pantalla = self.pantalla_var.get()
         se_apaga = self.se_apaga_var.get()
         codigo = self.codigo_var.get()
+        color_pantalla = codigo if codigo in ["azul", "negra"] else "desconocido"
+
 
         color_pantalla = codigo if codigo != "No detectado" else "desconocido"
 
         sintomas = Sintomas(
             enciende=enciende,
-            pitidos=pitidos,  # <- CORRECTO
+            pitidos=pitidos,
             tipo_pitido=tipo_pitido,
             pantalla=pantalla,
             se_apaga=se_apaga,
-            color_pantalla=color_pantalla  # <- CORRECTO
+            color_pantalla=color_pantalla
         )
 
         experto = DiagnosticoPC()
@@ -167,3 +169,22 @@ class DiagnoPCApp(ctk.CTk):
 
         self.ultimo_diagnostico = diagnostico
         self.ultimo_sintomas = sintomas
+
+    def generar_reporte_pdf(self):
+        if self.ultimo_diagnostico is None or self.ultimo_sintomas is None:
+            self.resultado_label.configure(text="Por favor, primero realice el diagnóstico.")
+            return
+        try:
+            registro_consulta(str(self.ultimo_sintomas), self.ultimo_diagnostico)
+        except Exception as e:
+            print("Error al registrar consulta:", e)
+        try:
+            generar_reporte(self.ultimo_sintomas, self.ultimo_diagnostico)
+            self.resultado_label.configure(text="Reporte generado exitosamente.")
+        except Exception as e:
+            self.resultado_label.configure(text=f"Error al generar reporte: {e}")
+
+if __name__ == "__main__":
+    ctk.set_appearance_mode("dark")
+    app = DiagnoPCApp()
+    app.mainloop()
