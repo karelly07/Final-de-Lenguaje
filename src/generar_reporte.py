@@ -1,5 +1,6 @@
 from fpdf import FPDF
 from datetime import datetime
+import os
 
 class PDF(FPDF):
     def header(self):
@@ -72,5 +73,15 @@ def generar_reporte(sintomas, diagnostico, codigo_error=None, solucion_error=Non
         texto_diag += f"\n\nSolución sugerida para el código detectado:\n{solucion_error}"
     pdf.multi_cell(0, 10, texto_diag, border=1, fill=True)
 
-    pdf.output("reporte_diagnostico.pdf")
-    print("Reporte generado como 'reporte_diagnostico.pdf'")
+    # -----------------------
+    # Guardar en la carpeta /reportes con nombre personalizado
+    # -----------------------
+    fecha_str = datetime.now().strftime("%Y-%m-%d-%H-%M-%S")
+    nombre_archivo = f"reporte-diagnostico-{fecha_str}.pdf"
+    # Esta ruta apunta a /reportes (al lado de src)
+    ruta_carpeta = os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "reportes"))
+    os.makedirs(ruta_carpeta, exist_ok=True)  # Si la carpeta no existe, la crea
+    ruta_completa = os.path.join(ruta_carpeta, nombre_archivo)
+
+    pdf.output(ruta_completa)
+    print(f"Reporte generado como '{ruta_completa}'")
