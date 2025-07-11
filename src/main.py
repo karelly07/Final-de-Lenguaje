@@ -179,10 +179,29 @@ class DiagnoPCApp(ctk.CTk):
         except Exception as e:
             print("Error al registrar consulta:", e)
         try:
-            generar_reporte(self.ultimo_sintomas, self.ultimo_diagnostico)
+            # Detecta código de error y posible solución
+            codigo_detectado = self.codigo_var.get()
+            codigo_error, solucion_error = "-", None
+            if "Error detectado:" in codigo_detectado:
+                lines = codigo_detectado.split('\n')
+                cod = lines[0].replace("Error detectado:", "").strip()
+                codigo_error = cod if cod else "-"
+                if len(lines) > 1 and "Solución:" in lines[1]:
+                    solucion_error = lines[1].replace("Solución:", "").strip()
+            elif codigo_detectado not in ["No detectado", "-", "", None]:
+                codigo_error = codigo_detectado.strip()
+
+            generar_reporte(
+                self.ultimo_sintomas,
+                self.ultimo_diagnostico,
+                codigo_error=codigo_error,
+                solucion_error=solucion_error
+            )
             self.resultado_label.configure(text="Reporte generado exitosamente.")
         except Exception as e:
             self.resultado_label.configure(text=f"Error al generar reporte: {e}")
+
+
 
 if __name__ == "__main__":
     ctk.set_appearance_mode("dark")
