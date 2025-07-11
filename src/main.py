@@ -35,7 +35,7 @@ def ejecutar_diagnostico():
         tipo_pitido=pitido_tipo,
         pantalla=pantalla,
         se_apaga=se_apaga,
-        color_pantalla=color_detectado
+        color_pantalla=color_detectado if color_detectado in ["azul", "negra"] else "desconocido"
     )
 
     experto = DiagnosticoPC()

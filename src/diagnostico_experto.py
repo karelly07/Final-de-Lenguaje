@@ -42,6 +42,26 @@ class DiagnosticoPC(KnowledgeEngine):
     def pantalla_azul(self):
         self.diagnostico_final = "Pantalla azul detectada. Posible fallo crítico del sistema operativo (BSOD)."
 
-    @Rule(Sintomas(color_pantalla="negra"))
-    def pantalla_negra(self):
-        self.diagnostico_final = "Pantalla negra detectada. Posible problema de señal, tarjeta gráfica o sistema apagado."
+    @Rule(Sintomas(color_pantalla="negra"), Sintomas(enciende="no"))
+    def pantalla_negra_no_enciende(self):
+        self.diagnostico_final = (
+            "Pantalla negra y no enciende. Revisa la fuente de poder, el cableado, o la placa base. "
+            "Prueba con otra fuente o en otra toma eléctrica."
+        )
+
+    @Rule(Sintomas(color_pantalla="negra"), Sintomas(enciende="si"), Sintomas(pitidos="si"))
+    def pantalla_negra_con_pitidos(self):
+        self.diagnostico_final = (
+            "Pantalla negra con pitidos. Puede ser un error de memoria RAM o tarjeta gráfica. "
+            "Revisa el patrón de los pitidos: \n"
+            "- 1 largo y 2 cortos: error en la tarjeta de video.\n"
+            "- Pitidos continuos: posible RAM defectuosa.\n"
+            "- Sin pitidos: problema más grave en CPU o placa."
+        )
+
+    @Rule(Sintomas(color_pantalla="negra"), Sintomas(enciende="si"), Sintomas(pitidos="no"))
+    def pantalla_negra_sin_pitidos(self):
+        self.diagnostico_final = (
+            "Pantalla negra pero enciende sin pitidos. Es posible que la BIOS no esté funcionando correctamente, "
+            "o que haya un daño en el procesador o placa madre. También puede ser que no haya señal de video al monitor."
+        )
