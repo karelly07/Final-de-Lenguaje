@@ -1,12 +1,11 @@
 from experta import *
 
 class Sintomas(Fact):
-    """Hechos que representan los síntomas observados en el PC"""
     enciende = Field(str, default="no")
     pitidos = Field(str, default="no")
     tipo_pitido = Field(str, default="")
     pantalla = Field(str, default="no")
-    se_apaga = Field(str, default="no")  # Se puede usar si se implementa en main.py
+    se_apaga = Field(str, default="no")
     color_pantalla = Field(str, default="")
 
 class DiagnosticoPC(KnowledgeEngine):

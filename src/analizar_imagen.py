@@ -1,51 +1,63 @@
 import cv2
 import numpy as np
 import pytesseract
+
 pytesseract.pytesseract.tesseract_cmd = r"C:\Program Files\Tesseract-OCR\tesseract.exe"
 
 def analizar_imagen(imagen):
     try:
         gris = cv2.cvtColor(imagen, cv2.COLOR_BGR2GRAY)
         texto = pytesseract.image_to_string(gris, lang='eng').strip()
-
-        # Detectar si la imagen es casi negra (umbral ajustable)
         porcentaje_negro = np.sum(gris < 20) / gris.size
-        if porcentaje_negro > 0.95:  # 95% de la imagen es casi negro
-            return "Pantalla negra, no se encontró el error. Pase a la fase de preguntas."
 
-        # Si no hay texto pero la imagen NO es negra
+        if porcentaje_negro > 0.95:
+            return (
+                "Pantalla negra, no se encontró el error. Pase a la fase de preguntas.",
+                "Pantalla negra|No se encontró el error. Pase a la fase de preguntas."
+            )
+
         if not texto:
-            return "No se detectó texto en la imagen. Asegúrese de subir una imagen válida o pase a la fase de preguntas."
+            return (
+                "No se detectó texto en la imagen. Asegúrese de subir una imagen válida o pase a la fase de preguntas.",
+                "Sin texto|No se detectó texto en la imagen."
+            )
 
         texto = texto.upper()
-        print("\nTexto detectado en pantalla azul:\n", texto)
-
         errores = {
             "INACCESSIBLE_BOOT_DEVICE": "Verifica la conexión del disco y drivers de almacenamiento.",
-            "PAGE_FAULT_IN_NONPAGED_AREA": "FALLO DE PÁGINA EN ÁREA NO PAGADA. Posible RAM defectuosa o controlador dañado.",
+            "PAGE_FAULT_IN_NONPAGED_AREA": "Fallo de página en área no pagada. Posible RAM defectuosa o controlador dañado.",
             "IRQL_NOT_LESS_OR_EQUAL": "Conflicto de drivers. Prueba arrancar en modo seguro y reinstalar controladores.",
-            "0X0000000A": "IRQL_NOT_LESS_OR_EQUAL. Incompatibilidad de controlador o hardware.",
-            "0X0000003B": "EXCEPCIÓN DE SERVICIO DEL SISTEMA. Conflictos entre drivers o antivirus.",
-            "0X0000001E": "KMODE_EXCEPTION_NOT_HANDLED. Error grave del kernel; revisa hardware y drivers.",
-            "0X000000EF": "CRITICAL_PROCESS_DIED. Proceso esencial del sistema falló. Intenta reparar Windows.",
-            "0X0000001A": "GESTIÓN DE MEMORIA. Posible daño en RAM o errores de disco.",
-            "0X000000D1": "DRIVER_IRQL_NOT_LESS_OR_EQUAL. Controlador mal instalado o dañado.",
-            "0X00000116": "VIDEO_TDR_FAILURE. Falla del driver de video. Actualiza tu tarjeta gráfica.",
-            "0X0000007B": "DISPOSITIVO DE ARRANQUE INACCESIBLE. Disco no detectado o sistema corrupto.",
-            "0X00000019": "BAD_POOL_HEADER. Error de gestión de memoria del sistema.",
-            "0X0000007E": "EXCEPCIÓN DE SUBPROCESO DEL SISTEMA NO CONTROLADA. Error de driver o hardware.",
-            "0X00000074": "BAD_SYSTEM_CONFIG_INFO. Archivos de configuración dañados.",
-            "0X00000124": "WHEA_UNCORRECTABLE_ERROR. Falla de hardware; revisa ventilación, CPU, RAM.",
-            "0X000000ED": "VOLUMEN DE ARRANQUE NO MONTABLE. Error de disco; intenta reparar con comandos CHKDSK.",
-            "0X0000009C": "MACHINE_CHECK_EXCEPTION. Fallo de hardware crítico; revisa fuentes y temperatura.",
-            "0X00000133": "DPC_WATCHDOG_VIOLATION. Problemas con drivers o SSD; actualiza el firmware."
+            "0X0000000A": "Incompatibilidad de controlador o hardware.",
+            "0X0000003B": "Conflictos entre drivers o antivirus.",
+            "0X0000001E": "Error grave del kernel; revisa hardware y drivers.",
+            "0X000000EF": "Proceso esencial del sistema falló. Intenta reparar Windows.",
+            "0X0000001A": "Posible daño en RAM o errores de disco.",
+            "0X000000D1": "Controlador mal instalado o dañado.",
+            "0X00000116": "Falla del driver de video. Actualiza tu tarjeta gráfica.",
+            "0X0000007B": "Disco no detectado o sistema corrupto.",
+            "0X00000019": "Error de gestión de memoria del sistema.",
+            "0X0000007E": "Error de driver o hardware.",
+            "0X00000074": "Archivos de configuración dañados.",
+            "0X00000124": "Falla de hardware; revisa ventilación, CPU, RAM.",
+            "0X000000ED": "Error de disco; intenta reparar con comandos CHKDSK.",
+            "0X0000009C": "Fallo de hardware crítico; revisa fuentes y temperatura.",
+            "0X00000133": "Problemas con drivers o SSD; actualiza el firmware."
         }
 
         for clave, solucion in errores.items():
             if clave in texto:
-                return f"Error detectado: {clave}\nSolución: {solucion}"
+                return (
+                    f"Error detectado: {clave}\nDiagnostico: {solucion}",
+                    f"{clave}|{solucion}"
+                )
 
-        return "Pantalla azul detectada, pero el error no fue reconocido. Revisa el texto manualmente."
+        return (
+            "Pantalla azul detectada, pero el error no fue reconocido. Revisa el texto manualmente.",
+            "Pantalla azul|No se reconoció el error."
+        )
 
     except Exception as e:
-        return f"Error al analizar la pantalla azul: {e}"
+        return (
+            f"Error al analizar la pantalla azul: {e}",
+            f"Error|Error al analizar la pantalla azul: {e}"
+        )
